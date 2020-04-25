@@ -108,6 +108,60 @@ public class Player {
             log.info("Cards: {}, {}, {}, {}, {}", this.activeDeck.get(0).getCost(),
                 this.activeDeck.get(1).getCost(), this.activeDeck.get(2).getCost(),
                 this.activeDeck.get(3).getCost(), this.activeDeck.get(4).getCost());
+        } else {
+            log.info("Player doesn't have any cards in active deck.");
         }
+    }
+
+    public Card takeCard() {
+        return this.playableDeck.getCards().remove(this.playableDeck.getCards().size()-1);
+    }
+
+    public void takeStarterThreeCards() {
+        for (int activeCardCount = 0; activeCardCount < 3; activeCardCount++) {
+            this.activeDeck.add(takeCard());
+        }
+    }
+
+    public boolean isActiveDeckFull() {
+        return this.activeDeck.size() >= 5;
+    }
+
+    public boolean isPlayableDeckEmpty() {
+        return this.playableDeck.getCards().isEmpty();
+    }
+
+    public void addCardToHand() {
+        this.activeDeck.add(takeCard());
+    }
+
+    public void playZeroCard() {
+        for (Card card : this.activeDeck) {
+            if (card.getCost() == 0) {
+                this.activeDeck.remove(card);
+                log.info("player1 playing zero value card: {}", card.getCost());
+                break;
+            }
+        }
+    }
+
+    public void discardCard() {
+        Card discardedCard = takeCard();
+        this.discardDeck.add(discardedCard);
+        log.info("Discarding card {} to discard pile..", discardedCard.getCost());
+        log.info("Discard pile total count is {}", this.discardDeck.size());
+    }
+
+    public boolean hasPlayableCard(int mana) {
+        for (Card deckCard : this.activeDeck) {
+            if (deckCard.getCost() <= mana) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Card getNextCard() {
+        return this.playableDeck.getCards().get(this.playableDeck.getCards().size()-1);
     }
 }

@@ -6,6 +6,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.IOException;
+import java.util.Scanner;
+
 @SpringBootApplication
 public class TradingCardGameApplication implements CommandLineRunner {
 
@@ -15,9 +18,17 @@ public class TradingCardGameApplication implements CommandLineRunner {
         SpringApplication.run(TradingCardGameApplication.class, args);
     }
 
-    @Override public void run(String... args) {
+    @Override public void run(String... args) throws IOException {
         log.info("Starting game!");
-        Game.run();
+        log.info("Press 1 then ENTER if you want to play: ");
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+        while (choice == 1) {
+            Game.run();
+            log.info("Press 1 then ENTER if you want to play: ");
+            choice = scanner.nextInt();
+        }
+        log.info("Finishing game...");
     }
 
 }
