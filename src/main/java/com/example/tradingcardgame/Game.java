@@ -16,93 +16,97 @@ public final class Game {
     public static void run() {
         log.info("Game is about to start!");
 
-        Player player1 = new Player();
-        Player player2 = new Player();
+        Player player1 = new Player("First player");
+        Player player2 = new Player("Second player");
         int activeMana;
 
         takeStarterThreeCards(player1, player2);
 
-        showGameStatus(player1, player2);
+        int turn = coinToss(player1, player2);
 
-        int turn = coinToss();
+        while (isGameEnd(player1, player2)) {
+            showGameStatus(player1, player2);
 
-        if (turn == 0) {
-            log.info("player1 starts the game!");
-        } else {
-            log.info("player2 starts the game!");
-        }
-
-        while (player1.getHp() > 0 && player2.getHp() > 0) {
-            log.info("New turn!!!");
+            log.info("Starting new turn..");
             if (turn % 2 == 0) {
-                log.info("player1 mana raises +1 {} -> {}", player1.getMana(), player1.getMana() + 1);
+                log.info("{} 's mana raises +1 {} -> {}", player1.getName(), player1.getMana(), player1.getMana() + 1);
 
                 activeMana = gainMana(player1);
 
                 checkPlayableDeckSize(player1);
 
-                log.info("player1's next card is: {}", player1.getNextCard().getCost());
+                log.info("{} 's next card is: {}", player1.getName(), player1.getNextCard().getCost());
 
                 play(player1, player2, activeMana);
             } else {
-                log.info("player2 mana raises +1 {} -> {}", player2.getMana(), player2.getMana() + 1);
+                log.info("{} 's mana raises +1 {} -> {}", player2.getName(), player2.getMana(), player2.getMana() + 1);
                 activeMana = gainMana(player2);
 
                 checkPlayableDeckSize(player2);
 
-                log.info("player2's next card is: {}", player2.getNextCard().getCost());
+                log.info("{} 's next card is: {}", player2.getName(), player2.getNextCard().getCost());
 
                 play(player2, player1, activeMana);
             }
-
-            log.info("player1 health point is: {}, mana is: {}, playable deck cards count: {}", player1.getHp(),
-                player1.getMana(), player1.getPlayableDeck().getCards().size());
-            player1.showCards();
-            log.info("player2 health point is: {}, mana is: {}, playable deck cards count: {}", player2.getHp(),
-                player2.getMana(), player2.getPlayableDeck().getCards().size());
-            player2.showCards();
 
             turn++;
             log.info("---------------------------------------------------------------------------");
         }
 
+        logWinner(player1, player2);
+    }
+
+    private static void logWinner(Player player1, Player player2) {
         if (player1.getHp() > 0) {
-            log.info("PLAYER 1 WON!");
+            log.info("{} WON!", player1.getName());
         } else {
-            log.info("PLAYER 2 WON!");
+            log.info("{} WON!", player2.getName());
         }
+    }
+
+    private static boolean isGameEnd(Player player1, Player player2) {
+        return player1.getHp() > 0 && player2.getHp() > 0;
+    }
+
+    private static void showGameStatus(Player player1, Player player2) {
+        log.info("{} health point is: {}, mana is: {}, playable deck cards count: {}", player1.getName(), player1.getHp(),
+            player1.getMana(), player1.getPlayableDeck().getCards().size());
+        player1.showCards();
+        log.info("{} health point is: {}, mana is: {}, playable deck cards count: {}", player2.getName(), player2.getHp(),
+            player2.getMana(), player2.getPlayableDeck().getCards().size());
+        player2.showCards();
     }
 
     private static void play(Player activePlayer, Player otherPlayer, int tempMana) {
         if (!activePlayer.isActiveDeckFull()) {
-            log.info("player adding card to deck: {}", activePlayer.getNextCard().getCost());
+            log.info("{} adding card {} to deck..", activePlayer.getName(), activePlayer.getNextCard().getCost());
             activePlayer.addCardToHand();
-            log.info("Showing player cards");
+            log.info("Showing {} cards", activePlayer.getName());
             activePlayer.showCards();
         } else {
-            log.info("Showing player cards");
+            log.info("Showing {} cards", activePlayer.getName());
             activePlayer.showCards();
 
-            log.info("Looking if player has zero value or a playable card..");
+            log.info("Looking if {} has zero value or a playable card..", activePlayer.getName());
             if (activePlayer.hasZeroCard()) {
                 activePlayer.playZeroCard();
                 if (!activePlayer.isPlayableDeckEmpty()) {
-                    log.info("player adding card to deck: {}", activePlayer.getNextCard().getCost());
+                    log.info("{} adding card to deck: {}", activePlayer.getName(), activePlayer.getNextCard().getCost());
                     activePlayer.addCardToHand();
                 }
             } else if (activePlayer.hasPlayableCard(tempMana)) {
                 Card card = activePlayer.getHighManaCard(activePlayer.getMana());
                 activePlayer.playCard(card);
-                log.info("player plays card: {}", card.getCost());
+                log.info("{} plays card: {}", activePlayer.getName(), card.getCost());
                 otherPlayer.setHp((otherPlayer.getHp() - card.getCost()));
-                log.info("player loses hp: {}, player2 new hp: {}", card.getCost(), otherPlayer.getHp());
+                log.info("{} loses hp: {}, player2 new hp: {}", otherPlayer.getName(), card.getCost(), otherPlayer.getHp());
                 tempMana = tempMana - card.getCost();
                 if (!activePlayer.isPlayableDeckEmpty()) {
-                    log.info("player adding card to deck: {}", activePlayer.getNextCard().getCost());
+                    log.info("{} adding card to deck: {}", activePlayer.getName(), activePlayer.getNextCard().getCost());
                     activePlayer.addCardToHand();
                 }
             } else {
-                log.info("player doesn't have any zero value or playable card");
+                log.info("{} doesn't have any zero value or playable card", activePlayer.getName());
                 if (!activePlayer.isPlayableDeckEmpty()) {
                     activePlayer.discardCard();
                 }
@@ -113,14 +117,14 @@ public final class Game {
             if (activePlayer.hasPlayableCard(tempMana)) {
                 Card card = activePlayer.getHighManaCard(tempMana);
                 activePlayer.playCard(card);
-                log.info("player plays card: {}", card.getCost());
+                log.info("{} plays card: {}", activePlayer.getName(), card.getCost());
                 if (card.getCost() > 0) {
                     otherPlayer.setHp((otherPlayer.getHp() - card.getCost()));
-                    log.info("player2 loses hp: {}, player2 new hp: {}", card.getCost(), otherPlayer.getHp());
+                    log.info("{} loses hp: {}, player new hp: {}", otherPlayer.getName(), card.getCost(), otherPlayer.getHp());
                 }
                 tempMana = tempMana - card.getCost();
             } else {
-                log.info("player doesn't have any card to play!");
+                log.info("{} doesn't have any card to play!", activePlayer.getName());
                 break;
             }
         }
@@ -140,17 +144,16 @@ public final class Game {
         return player.getMana();
     }
 
-    private static int coinToss() {
-        return new Random().nextInt(2);
-    }
+    private static int coinToss(Player player1, Player player2) {
+        int turn = new Random().nextInt(2);
 
-    private static void showGameStatus(Player player1, Player player2) {
-        log.info("player1 cards: ");
-        player1.showCards();
-        log.info("--------------------");
-        log.info("player2 cards: ");
-        player2.showCards();
-        log.info("--------------------");
+        if (turn == 0) {
+            log.info("{} starts the game!", player1.getName());
+        } else {
+            log.info("{} starts the game!", player2.getName());
+        }
+
+        return turn;
     }
 
     private static void takeStarterThreeCards(Player player1, Player player2) {

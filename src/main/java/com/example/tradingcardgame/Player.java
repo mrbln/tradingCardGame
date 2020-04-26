@@ -9,18 +9,28 @@ import java.util.List;
 public class Player {
     private static Logger log = LoggerFactory.getLogger(Player.class);
 
+    private String name;
     private int hp;
     private int mana;
     private Deck playableDeck;
     private List<Card> activeDeck;
     private List<Card> discardDeck;
 
-    public Player() {
+    public Player(String name) {
+        this.name = name;
         this.hp = 30;
         this.mana = 0;
         this.playableDeck = new Deck();
         this.activeDeck = new ArrayList<>();
         this.discardDeck = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public int getHp() {
@@ -109,7 +119,7 @@ public class Player {
                 this.activeDeck.get(1).getCost(), this.activeDeck.get(2).getCost(),
                 this.activeDeck.get(3).getCost(), this.activeDeck.get(4).getCost());
         } else {
-            log.info("Player doesn't have any cards in active deck.");
+            log.info("{} doesn't have any cards in active deck.", this.name);
         }
     }
 
@@ -139,7 +149,7 @@ public class Player {
         for (Card card : this.activeDeck) {
             if (card.getCost() == 0) {
                 this.activeDeck.remove(card);
-                log.info("player1 playing zero value card: {}", card.getCost());
+                log.info("{} playing zero value card: {}", this.name, card.getCost());
                 break;
             }
         }
