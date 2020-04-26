@@ -87,27 +87,21 @@ public final class Game {
             log.info("Showing {} cards", activePlayer.getName());
             activePlayer.showCards();
 
-            log.info("Looking if {} has zero value or a playable card..", activePlayer.getName());
-            if (activePlayer.hasZeroCard()) {
-                activePlayer.playZeroCard();
-                if (!activePlayer.isPlayableDeckEmpty()) {
+            if (!activePlayer.isPlayableDeckEmpty()) {
+                log.info("Looking if {} has zero value or a playable card..", activePlayer.getName());
+                if (activePlayer.hasZeroCard()) {
+                    activePlayer.playZeroCard();
                     log.info("{} adding card to deck: {}", activePlayer.getName(), activePlayer.getNextCard().getCost());
                     activePlayer.addCardToHand();
-                }
-            } else if (activePlayer.hasPlayableCard(tempMana)) {
-                Card card = activePlayer.getHighManaCard(activePlayer.getMana());
-                activePlayer.playCard(card);
-                log.info("{} plays card: {}", activePlayer.getName(), card.getCost());
-                otherPlayer.setHp((otherPlayer.getHp() - card.getCost()));
-                log.info("{} loses hp: {}, player2 new hp: {}", otherPlayer.getName(), card.getCost(), otherPlayer.getHp());
-                tempMana = tempMana - card.getCost();
-                if (!activePlayer.isPlayableDeckEmpty()) {
+                } else if (activePlayer.hasPlayableCard(tempMana)) {
+                    log.info("{} doesn't have any zero card. Looking for another playable cards..", activePlayer.getName());
+                    tempMana = playMostDamagingCard(activePlayer, otherPlayer, activePlayer.getMana());
                     log.info("{} adding card to deck: {}", activePlayer.getName(), activePlayer.getNextCard().getCost());
                     activePlayer.addCardToHand();
-                }
-            } else {
-                log.info("{} doesn't have any zero value or playable card", activePlayer.getName());
-                if (!activePlayer.isPlayableDeckEmpty()) {
+                } else {
+                    log.info("{} doesn't have any zero value or playable card", activePlayer.getName());
+                    log.info("Discarding card {} to discard pile..", activePlayer.getNextCard().getCost());
+                    log.info("Discard pile total count is {}", activePlayer.getDiscardDeck().size());
                     activePlayer.discardCard();
                 }
             }
@@ -115,19 +109,24 @@ public final class Game {
 
         while (tempMana >= 0) {
             if (activePlayer.hasPlayableCard(tempMana)) {
-                Card card = activePlayer.getHighManaCard(tempMana);
-                activePlayer.playCard(card);
-                log.info("{} plays card: {}", activePlayer.getName(), card.getCost());
-                if (card.getCost() > 0) {
-                    otherPlayer.setHp((otherPlayer.getHp() - card.getCost()));
-                    log.info("{} loses hp: {}, player new hp: {}", otherPlayer.getName(), card.getCost(), otherPlayer.getHp());
-                }
-                tempMana = tempMana - card.getCost();
+                tempMana = playMostDamagingCard(activePlayer, otherPlayer, tempMana);
             } else {
                 log.info("{} doesn't have any card to play!", activePlayer.getName());
                 break;
             }
         }
+    }
+
+    private static int playMostDamagingCard(Player activePlayer, Player otherPlayer, int tempMana) {
+        Card card = activePlayer.getHighManaCard(tempMana);
+        activePlayer.playCard(card);
+        log.info("{} plays card: {}", activePlayer.getName(), card.getCost());
+        if (card.getCost() > 0) {
+            otherPlayer.setHp((otherPlayer.getHp() - card.getCost()));
+            log.info("{} loses hp: {}, player new hp: {}", otherPlayer.getName(), card.getCost(), otherPlayer.getHp());
+        }
+        tempMana = tempMana - card.getCost();
+        return tempMana;
     }
 
     private static void checkPlayableDeckSize(Player player) {

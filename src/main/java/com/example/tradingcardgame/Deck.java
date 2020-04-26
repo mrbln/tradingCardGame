@@ -21,7 +21,7 @@ public class Deck {
         this.cards = cards;
     }
 
-    public void createDeck() {
+    public List<Card> createDeck() {
         this.cards = new ArrayList<>(GameConstants.DECK_SIZE);
 
         for (int manaCount = 0; manaCount <= GameConstants.MAX_MANA_COUNT; manaCount++) {
@@ -47,6 +47,8 @@ public class Deck {
         }
 
         Collections.shuffle(this.cards);
+
+        return this.cards;
     }
 
     private void addEightManaCards(int manaCount) {

@@ -96,7 +96,7 @@ public class Player {
         for (Card deckCard : this.activeDeck) {
             if (card.getCost() == deckCard.getCost()) {
                 this.activeDeck.remove(deckCard);
-                break;
+                return;
             }
         }
     }
@@ -158,8 +158,6 @@ public class Player {
     public void discardCard() {
         Card discardedCard = takeCard();
         this.discardDeck.add(discardedCard);
-        log.info("Discarding card {} to discard pile..", discardedCard.getCost());
-        log.info("Discard pile total count is {}", this.discardDeck.size());
     }
 
     public boolean hasPlayableCard(int mana) {
